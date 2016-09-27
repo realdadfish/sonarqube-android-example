@@ -1,0 +1,73 @@
+apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.2"
+
+    defaultConfig {
+        applicationId "biz.thomaskeller.sonarqubeandroidexample"
+        minSdkVersion 18
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            testCoverageEnabled true
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    flavorDimensions 'configuration', 'api'
+
+    productFlavors {
+        prod {
+            dimension 'configuration'
+        }
+        internal {
+            dimension 'configuration'
+        }
+        compat {
+            minSdkVersion 18
+            dimension 'api'
+        }
+        bleeding {
+            minSdkVersion 21
+            dimension 'api'
+        }
+    }
+
+    // ignore a specific variant as an example
+    variantFilter { variant ->
+        if (variant.getFlavors().get(0).name.equals('prod') &&
+                variant.getFlavors().get(1).name.equals('bleeding')) {
+            variant.setIgnore(true);
+        }
+    }
+
+    // needed to trick Android Studio / IntelliJ into supporting Java 8 syntax
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    debugCompile project(path: ':mylibrary', configuration: 'debug')
+    releaseCompile project(path: ':mylibrary', configuration: 'release')
+
+    retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:2.3.0'
+
+    testCompile 'junit:junit:4.12'
+
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+}
